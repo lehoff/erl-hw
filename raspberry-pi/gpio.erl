@@ -2,6 +2,8 @@
 -export([init/2, write/2, write_set/2, read/1, release/1]).
 
 init(Pin, Direction) ->
+	release(Pin),
+
   {ok, FdExport} = file:open("/sys/class/gpio/export", [write]),
   file:write(FdExport, integer_to_list(Pin)),
   file:close(FdExport),
