@@ -1,21 +1,21 @@
 -module(sensor).
--export([start/2, stop/0, loop/2]).
+-export([start/3, stop/0, loop/3]).
 
-start(Pin, PidController) ->
+start(Id, Pin, PidController) ->
 	FdPin = gpio:init(Pin, in),
-	Pid = spawn(?MODULE, loop, [FdPin, PidController]),
+	Pid = spawn(?MODULE, loop, [Id, FdPin, PidController]),
 	Pid.
 
 stop() ->
 	%gpio:release(FdPin),
 	exit(stopped).
 
-loop(FdPin, PidController) ->
+loop(Id, FdPin, PidController) ->
 	PinState = gpio:read(FdPin),
 	case PinState of
-		"1" -> PidController ! {state, on_line};
-		"0" -> PidController ! {state, off_line}
+		"1" -> PidController ! {state, Id, 1};
+		"0" -> PidController ! {state, Id, 0}
 	end,
 	timer:sleep(2000),
-	loop(FdPin, PidController).
+	loop(Id, FdPin, PidController).
 
