@@ -40,31 +40,13 @@ loop(State, MotorController) ->
 	end.
 
 navigate(State, MotorController) ->
-	%io:format("L:~s T:~s R:~s~n", tuple_to_list(State)),
-	case State of
-		{0, 0, 0} ->
-			% A) line lost, keep turning left until we hit line again
-			MotorController ! left;	
-		{0, 0, 1} ->
-			% B) steering left (hard)
-			MotorController ! right;
-		{0, 1, 0} ->
-			% C) keep going straight
-			MotorController ! forward;
-		{0, 1, 1} ->
-			% D) steering left
-			MotorController ! right;
-		{1, 0, 0} ->
-			% E) steering right (hard)
-			MotorController ! left;
-		{1, 0, 1} ->
-			% F) top off line, recover
-			MotorController ! left;
-		{1, 1, 0} ->
-			% G) steering right
-			MotorController ! left;
-		{1, 1, 1}	->
-			% H) keep going straight (this shouldn't really happen)
-			MotorController ! forward
-	end.
+    %%io:format("L:~s T:~s R:~s~n", tuple_to_list(State)),
+    MotorController ! state_direction(State).
+
+-type state_direction({0|1, 0|1, 0|1}) -> 'left' | 'right' | 'forward'.
+state_direction({0, _, 1}) -> right;
+state_direction(State) when State == {0, 1, 0};
+                            State == {1, 1, 1} -> forward;
+state_direction(_) -> left.
+    
 

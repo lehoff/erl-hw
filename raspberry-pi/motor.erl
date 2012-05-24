@@ -10,23 +10,22 @@ stop() ->
 	self() ! stop.
 
 loop({PinDir1, PinDir2}) ->
-	receive
-		cw ->
-			gpio:write_set([PinDir1, PinDir2], [0, 1]),
-			loop({PinDir1, PinDir2});
-
-		ccw ->
-			gpio:write_set([PinDir1, PinDir2], [1, 0]),
-			loop({PinDir1, PinDir2});
-
-		halt ->
-			gpio:write_set([PinDir1, PinDir2], [0, 0]),
-			loop({PinDir1, PinDir2});
-
-		stop ->
-			gpio:write_set([PinDir1, PinDir2], [0, 0]),
-			%gpio:release(PinDir1),
-			%gpio:release(PinDir2),
-			exit(terminated)
+    receive
+        M when M == cw;
+               M == ccw;
+               M == halt ->
+            gpio:write_set([PinDir1, PinDir2], pin_settings(M)),
+            loop({PinDir1, PinDir2});
+        stop ->
+            gpio:write_set([PinDir1, PinDir2],
+                           pin_settings(stop)),
+                                                %gpio:release(PinDir1),
+                                                %gpio:release(PinDir2),
+            exit(terminated)
 	end.
  
+pin_settings(cw)   -> [0, 1];
+pin_settings(ccw)  -> [1, 0];
+pin_settings(halt) -> [0, 0];
+pin_settings(stop) -> [0, 0]. 
+    
